@@ -36,6 +36,9 @@ onBeforeUnmount(async () => {
       <List :data="data" />
     </div>
   </main>
+  <main v-else="data">
+    <h2>AEM Fetch failed, log into <a target="_blank" href="https://author-p54352-e854610.adobeaemcloud.com">https://author-p54352-e854610.adobeaemcloud.com</a></h2>
+  </main>
 </template>
 
 
