@@ -6,7 +6,7 @@ export default {
 </script>
 
 <template>
-  <div class="teaser">
+  <div class="teaser" :data-editable-path="teaser._path" >
     <div class="image">
       <img
         :src="'https://author-p54352-e854610.adobeaemcloud.com' + teaser?.image._path"
