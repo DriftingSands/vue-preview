@@ -6,19 +6,33 @@ import Teaser from "./Teaser.vue";
 const handleClick = event => {
   const nodeList = document.elementsFromPoint(event.x, event.y);
 
-  console.log("\x1b[31m ~ nodeList:", nodeList);
   const topMostEditableElement = nodeList.find(node => node?.dataset?.editablePath || node.attributes.path);
-  console.log("\x1b[31m ~ topMostEditableElement:", topMostEditableElement);
   if (!topMostEditableElement) {
     return;
   }
+
+  const searchParams = new URLSearchParams(window.location.search);
+
+  const boundingBox = topMostEditableElement.getBoundingClientRect();
+  window.parent.postMessage(
+    {
+      type: "editableBoundingRect",
+      payload: [
+        boundingBox.top + document.documentElement.scrollTop,
+        boundingBox.left,
+        boundingBox.height,
+        boundingBox.width,
+      ],
+    },
+    searchParams.get("iFrameHost")
+  );
 
   window.parent.postMessage(
     {
       type: "editablePath",
       payload: [topMostEditableElement?.dataset?.editablePath],
     },
-    new URLSearchParams(window.location.search).get("iFrameHost")
+    searchParams.get("iFrameHost")
   );
 };
 
