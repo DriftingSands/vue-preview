@@ -3,15 +3,18 @@ import { ref, onMounted, onBeforeUnmount, onBeforeMount } from "vue";
 import List from "./List.vue";
 import Teaser from "./Teaser.vue";
 
-const handleClick = event => {
+const data = ref(null);
+
+let searchParams;
+let topMostEditableElement;
+
+const handleClick = (event) => {
   const nodeList = document.elementsFromPoint(event.x, event.y);
 
-  const topMostEditableElement = nodeList.find(node => node?.dataset?.editablePath || node.attributes.path);
+  topMostEditableElement = nodeList.find((node) => node?.dataset?.editablePath || node.attributes.path);
   if (!topMostEditableElement) {
     return;
   }
-
-  const searchParams = new URLSearchParams(window.location.search);
 
   const boundingBox = topMostEditableElement.getBoundingClientRect();
   window.parent.postMessage(
@@ -36,7 +39,42 @@ const handleClick = event => {
   );
 };
 
-const data = ref(null);
+const handleResize = () => {
+  if (topMostEditableElement) {
+    const boundingBox = topMostEditableElement.getBoundingClientRect();
+    if (boundingBox) {
+      window.parent.postMessage(
+        {
+          type: "editableBoundingRect",
+          payload: [
+            boundingBox.top + document.documentElement.scrollTop,
+            boundingBox.left,
+            boundingBox.height,
+            boundingBox.width,
+          ],
+        },
+        searchParams.get("iFrameHost")
+      );
+    }
+  }
+};
+
+const handleScroll = () => {
+  window.parent.postMessage(
+    {
+      type: "scrollTop",
+      payload: document.documentElement.scrollTop,
+    },
+    searchParams.get("iFrameHost")
+  );
+};
+
+const dataHandler = (event) => {
+  if (event.data.type !== "setCfData") {
+    return;
+  }
+  data.value = event.data.payload.data;
+};
 
 onMounted(async () => {
   const response = await fetch(
@@ -48,20 +86,22 @@ onMounted(async () => {
   data.value = fetchData?.data?.pageByPath?.item;
 });
 
-const dataHandler = event => {
-  if (event.data.type !== "setCfData") {
+onBeforeMount(async () => {
+  searchParams = new URLSearchParams(window.location.search);
+  if (searchParams.get("editMode") === "false") {
     return;
   }
-  data.value = event.data.payload.data;
-};
-onBeforeMount(async () => {
   window.addEventListener("message", dataHandler);
   window.addEventListener("click", handleClick);
+  window.addEventListener("scroll", handleScroll);
+  window.addEventListener("resize", handleResize);
 });
 
 onBeforeUnmount(async () => {
   window.removeEventListener("message", dataHandler);
   window.removeEventListener("click", handleClick);
+  window.removeEventListener("scroll", handleScroll);
+  window.removeEventListener("resize", handleResize);
 });
 </script>
 
