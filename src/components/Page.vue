@@ -2,7 +2,6 @@
 import { ref, onMounted, onBeforeUnmount, onBeforeMount } from "vue";
 import List from "./List.vue";
 import Teaser from "./Teaser.vue";
-
 const data = ref(null);
 
 let searchParams;
@@ -86,7 +85,7 @@ onMounted(async () => {
   data.value = fetchData?.data?.pageByPath?.item;
 });
 
-onBeforeMount(async () => {
+onBeforeMount(() => {
   searchParams = new URLSearchParams(window.location.search);
   if (searchParams.get("editMode") === "false") {
     return;
@@ -97,7 +96,7 @@ onBeforeMount(async () => {
   window.addEventListener("resize", handleResize);
 });
 
-onBeforeUnmount(async () => {
+onBeforeUnmount(() => {
   window.removeEventListener("message", dataHandler);
   window.removeEventListener("click", handleClick);
   window.removeEventListener("scroll", handleScroll);
