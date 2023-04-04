@@ -2,7 +2,7 @@ import { onMounted, onUnmounted } from "vue";
 
 export function useEditable(teaserRef) {
   function scrollTo(event) {
-    console.log("\x1b[31m ~ teaserRef:", teaserRef);
+    if (event?.data?.type !== 'scrollToPath' || event.data.path !== ref.dataset.editablePath) {return}
     const box = teaserRef.value.getBoundingClientRect();
     // ignoring message if already inside panel
     if (box.top <= 0 && box.bottom >= window.innerHeight) {
