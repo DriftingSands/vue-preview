@@ -87,13 +87,16 @@ onMounted(async () => {
 
 onBeforeMount(() => {
   searchParams = new URLSearchParams(window.location.search);
-  if (searchParams.get("editMode") === "false") {
-    return;
+  if (searchParams.get("editMode") === "HOC") {
+    window.addEventListener("message", dataHandler);
+    window.addEventListener("click", handleClick);
+    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("resize", handleResize);
+  } else if (searchParams.get("editMode") !== 'false') {
+    window.cfEditorDataFunction = (newData) => {
+      data.value = newData
+    }
   }
-  window.addEventListener("message", dataHandler);
-  window.addEventListener("click", handleClick);
-  window.addEventListener("scroll", handleScroll);
-  window.addEventListener("resize", handleResize);
 });
 
 onBeforeUnmount(() => {

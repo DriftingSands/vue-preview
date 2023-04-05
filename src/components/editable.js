@@ -1,6 +1,7 @@
 import { onMounted, onUnmounted } from "vue";
 
 export function useEditable(teaserRef) {
+  if (new URLSearchParams(window.location.search) !== 'HOC') {return}
   function scrollTo(event) {
     if (event?.data?.type !== 'scrollToPath' || event.data.path !== ref.dataset.editablePath) {return}
     const box = teaserRef.value.getBoundingClientRect();
