@@ -2,7 +2,10 @@
 import { ref, onMounted, onBeforeUnmount, onBeforeMount } from "vue";
 import List from "./List.vue";
 import Teaser from "./Teaser.vue";
+import Logo from './Logo.vue'
 const data = ref(null);
+const fetchComplete = ref(false)
+const onlyExternalData = ref(false)
 
 let searchParams;
 let topMostEditableElement;
@@ -76,13 +79,22 @@ const dataHandler = (event) => {
 };
 
 onMounted(async () => {
-  const response = await fetch(
-    "https://author-p54352-e854610.adobeaemcloud.com/graphql/execute.json/sample-list/Homepage",
-    { credentials: "include" }
-  );
-  const fetchData = await response.json();
-
-  data.value = fetchData?.data?.pageByPath?.item;
+  if (searchParams.get('onlyExternalData') === 'true') {
+    onlyExternalData.value = true
+    return
+  }
+  try {
+    const response = await fetch(
+      "https://author-p54352-e854610.adobeaemcloud.com/graphql/execute.json/sample-list/Homepage",
+      { credentials: "include" }
+    );
+    const fetchData = await response.json();
+  
+    data.value = fetchData?.data?.pageByPath?.item;
+    fetchComplete.value = true
+  } catch (error) {
+    fetchComplete.value = true
+  }
 });
 
 onBeforeMount(() => {
@@ -108,14 +120,9 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main v-if="data">
+  <main v-if="data?.header || data?.listContent?.length || data?.teaser">
     <h1>
-      <img
-        src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Vue.js_Logo_2.svg/2367px-Vue.js_Logo_2.svg.png"
-        alt="svelte icon"
-        height="24"
-      />
-
+      <Logo />
       {{ data.header.toUpperCase() }}
     </h1>
 
@@ -125,12 +132,27 @@ onBeforeUnmount(() => {
     <Teaser :teaser="data.teaser" />
   </main>
 
-  <main v-else="data">
+  <main v-else-if="onlyExternalData">
     <h2>
+			<Logo/>
+			Waiting for data...
+		</h2>
+  </main>
+
+  <main v-else-if="fetchComplete">
+    <h2>
+      <Logo />
       AEM Fetch failed, log into
       <a target="_blank" href="https://author-p54352-e854610.adobeaemcloud.com"
         >https://author-p54352-e854610.adobeaemcloud.com</a
       >
     </h2>
+  </main>
+  
+  <main v-else>
+    <h2>
+			<Logo/>
+			Fetching data...
+		</h2>
   </main>
 </template>

@@ -13,11 +13,11 @@ useEditable(teaserRef)
 </script>
 
 <template>
-  <div class="teaser" :data-editable-path="teaser._path" ref="teaserRef" >
+  <div class="teaser" :data-editable-path="teaser?._path" ref="teaserRef" >
     <div class="image">
       <img
-        :src="'https://author-p54352-e854610.adobeaemcloud.com' + teaser?.image._path"
-        :alt="teaser?.imageAltText.plaintext"
+        :src="'https://publish-p54352-e854610.adobeaemcloud.com' + teaser?.image._path"
+        :alt="teaser?.imageAltText?.plaintext"
       />
     </div>
     <div class="textContent">
