@@ -2,10 +2,10 @@
 import { ref, onMounted, onBeforeUnmount, onBeforeMount } from "vue";
 import List from "./List.vue";
 import Teaser from "./Teaser.vue";
-import Logo from './Logo.vue'
+import Logo from "./Logo.vue";
 const data = ref(null);
-const fetchComplete = ref(false)
-const onlyExternalData = ref(false)
+const fetchComplete = ref(false);
+const onlyExternalData = ref(false);
 
 let searchParams;
 let topMostEditableElement;
@@ -35,7 +35,13 @@ const handleClick = (event) => {
   window.parent.postMessage(
     {
       type: "editablePath",
-      payload: [topMostEditableElement?.dataset?.editablePath],
+      payload: {
+        path: [topMostEditableElement?.dataset?.editablePath],
+        content: {
+          textContent: topMostEditableElement.textContent,
+          src: topMostEditableElement.src || topMostEditableElement.querySelector("img").src,
+        },
+      },
     },
     searchParams.get("iFrameHost")
   );
@@ -79,9 +85,9 @@ const dataHandler = (event) => {
 };
 
 onMounted(async () => {
-  if (searchParams.get('onlyExternalData') === 'true') {
-    onlyExternalData.value = true
-    return
+  if (searchParams.get("onlyExternalData") === "true") {
+    onlyExternalData.value = true;
+    return;
   }
   try {
     const response = await fetch(
@@ -89,11 +95,11 @@ onMounted(async () => {
       { credentials: "include" }
     );
     const fetchData = await response.json();
-  
+
     data.value = fetchData?.data?.pageByPath?.item;
-    fetchComplete.value = true
+    fetchComplete.value = true;
   } catch (error) {
-    fetchComplete.value = true
+    fetchComplete.value = true;
   }
 });
 
@@ -104,10 +110,10 @@ onBeforeMount(() => {
     window.addEventListener("click", handleClick);
     window.addEventListener("scroll", handleScroll);
     window.addEventListener("resize", handleResize);
-  } else if (searchParams.get("editMode") !== 'false') {
+  } else if (searchParams.get("editMode") !== "false") {
     window.cfEditorDataFunction = (newData) => {
-      data.value = newData
-    }
+      data.value = newData;
+    };
   }
 });
 
@@ -134,9 +140,9 @@ onBeforeUnmount(() => {
 
   <main v-else-if="onlyExternalData">
     <h2>
-			<Logo/>
-			Waiting for data...
-		</h2>
+      <Logo />
+      Waiting for data...
+    </h2>
   </main>
 
   <main v-else-if="fetchComplete">
@@ -148,11 +154,11 @@ onBeforeUnmount(() => {
       >
     </h2>
   </main>
-  
+
   <main v-else>
     <h2>
-			<Logo/>
-			Fetching data...
-		</h2>
+      <Logo />
+      Fetching data...
+    </h2>
   </main>
 </template>
