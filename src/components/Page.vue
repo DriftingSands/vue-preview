@@ -111,8 +111,8 @@ onBeforeMount(() => {
     window.addEventListener("scroll", handleScroll);
     window.addEventListener("resize", handleResize);
   } else if (searchParams.get("editMode") !== "false") {
-    window.cfEditorDataFunction = (newData) => {
-      data.value = newData;
+    window.cfEditorDataFunction = (event) => {
+      data.value = event.data.payload.data;
     };
   }
 });
@@ -127,13 +127,13 @@ onBeforeUnmount(() => {
 
 <template>
   <main v-if="data?.header || data?.listContent?.length || data?.teaser">
-    <h1>
+    <h1 :data-editable-path="data._path" data-inner-cf-path=".header" >
       <Logo />
       {{ data.header.toUpperCase() }}
     </h1>
 
     <div class="content">
-      <List :listContent="data.listContent" />
+      <List :listContent="data.listContent" :path="data._path" />
     </div>
     <Teaser :teaser="data.teaser" />
   </main>
